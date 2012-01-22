@@ -1,7 +1,8 @@
 package Siedler_Sonstiges;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import Sieder_Gebäude_P.Sägemühle;
 import Siedler_Aktionen.Baue;
@@ -59,12 +60,12 @@ public class K_Umwelt extends A_Umwelt{
 	@Override
 	public boolean aktion_Moeglich(A_Aktion a_Aktion, String agent) {
 		
-		Situation situation = (Situation) super.getSituationen().get(agent);
+		Situation situation = (Situation) super.getSituation();
 
 		Baue tmp = (Baue) a_Aktion;
 		if(tmp.getGebäude() == null)
 			return true;
-		HashMap<Ressource, Integer> benötigte_Ressourcen = tmp.getBenötigte_Ressourcen();
+		Map<Ressource, Integer> benötigte_Ressourcen = tmp.getBenötigte_Ressourcen();
 		for(Ressource res :benötigte_Ressourcen.keySet()){
 			if(benötigte_Ressourcen.get(res)>situation.getResourcen().get(res))
 				return false;
@@ -78,28 +79,35 @@ public class K_Umwelt extends A_Umwelt{
 		return null;
 	}
 
+	boolean episodevorbei = false;
+	
 	@Override
 	public Double berechne_Reward(String agent) {
 	//	if(true)
 		//	return 100.0;
-		HashMap<String, A_Situation> situationen =  super.getSituationen();
-		Situation situation = (Situation) situationen.get(agent);
+		Situation situation = (Situation) super.getSituation();
 		if(situation.getResourcen().get(new Ressource("Eisenerz")) >= 1 || situation.getResourcen().get(new Ressource("Gold")) >= 1 ){
-			super.neue_Episode();
+			//super.neue_Episode();
+			episodevorbei = true;
 			return 100.0;
 		}
 			
-		else
+		else{
+			episodevorbei = false;
 			return 0.0;
+		}
 	}
 	public void set_Inital(){
-		ArrayList<String> agenten = super.getAgenten();
+		//Set<String> agenten = super.getAgenten();
 		System.err.println("GUI");
-		for(int i=0; i< agenten.size();i++)
-			super.getSituationen().put(agenten.get(i), new Situation(agenten.get(i) ));
+		super.setSituation(new Situation());
 		//for(String agent_S: agenten)
 			//aktualisiere_GUI(agent_S);
 		System.err.println("RESET");
+	}
+	@Override
+	public boolean istEpisodeVorbei() {
+		return episodevorbei;
 	}
 
 }

@@ -1,33 +1,62 @@
 package Agent;
 
-
+/**
+ * Eine Konkrete Spielsituation
+ * definiere_ID() muss von der Anwendung konkret implementiert werden.
+ *
+ */
 public abstract class A_Situation implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
-	public int id = 99;
+	
 	int episode;
-	public int getEpisode() {
-		return episode;
+	
+	
+	
+	public int getEpisode() {return episode;}
+	public void setEpisode(int episode) {this.episode = episode;}
+	
+	private long getId() {return definiere_ID();}	
+	
+	/**
+	 * eindeutiger Identifier für die Situation
+	 */
+	public abstract long definiere_ID();
+	
+	
+	
+	
+	
+	@Override
+	public String toString() {
+		return String.valueOf(getId());
 	}
-	public void setEpisode(int episode) {
-		this.episode = episode;
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (getId() ^ (getId() >>> 32));
+		return result;
 	}
-	public long getId() {
-		return defeniere_ID();
-	}
-	public abstract long defeniere_ID();
-	public void setId(int id) {
-		this.id = id;
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof A_Situation)) {
+			return false;
+		}
+		A_Situation other = (A_Situation) obj;
+		if (getId() != other.getId()) {
+			return false;
+		}
+		return true;
 	}
 
-	@Override
-	public boolean equals(Object arg0) {
-		if (arg0 instanceof A_Situation) {
-			A_Situation tmp = (A_Situation) arg0;
-			if (tmp.getId() == this.getId())
-				return true;
-			else
-				return false;
-		} else
-			return false;
-	}
+	
+	
 }

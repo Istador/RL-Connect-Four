@@ -1,44 +1,59 @@
 package Agent;
 
-import java.util.HashMap;
+/**
+ * 
+ * Interface für Aktionen (Spielzüge)
+ * fuehre_Aus(Map, agent) und definiere_ID() müssen von der Anwendung implementiert werden
+ *
+ */
+public abstract class  A_Aktion implements java.io.Serializable{
+	private static final long serialVersionUID = 2449526577536844219L;
 
+	/**
+	 * Führe die Aktion auf der übergebenen Aktion aus
+	 */
+	public abstract A_Situation fuehre_Aus(A_Situation situation, String agent);
 
+	
+	private int getId() {return definiere_ID();}
+	
+	/**
+	 * eindeutiger Identifier für die Aktion
+	 */
+	public abstract int definiere_ID();
+	
+	
+	
+	@Override
+	public String toString() {
+		return String.valueOf(getId());
+	}
 
-public abstract  class  A_Aktion implements java.io.Serializable{
-	private static final long serialVersionUID = 1L;
-	public abstract int defeniere_ID();
-	public abstract HashMap<String, A_Situation> fuehre_Aus(HashMap<String, A_Situation> situation, String agent);
-		int id;
-		public int getId() {
-			return id;
-		}
-		
-		//public abstract A_Situation fuehre_Aus(A_Situation situation);
-		public void setId(int id) {
-			this.id = id;
-		}
-		public A_Aktion(int id) {
-				this.id = id;
-		}
-		public boolean equals(Object arg0) {
-			if (arg0 instanceof A_Aktion) {
-				A_Aktion tmp = (A_Aktion) arg0;
-				if (tmp.getId() == this.getId())
-					return true;
-				else
-					return false;
-			} else
-				return false;
-		}
-		@Override
-		public String toString() {
-			return "Gewählte Aktion: " + getId();
-		
-		}
-		public int definiere_ID() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + getId();
+		return result;
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof A_Aktion)) {
+			return false;
+		}
+		A_Aktion other = (A_Aktion) obj;
+		if (getId() != other.getId()) {
+			return false;
+		}
+		return true;
+	}
+	
 	
 }

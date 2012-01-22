@@ -6,7 +6,7 @@ import jade.util.leap.Serializable;
 import Agent.A_Situation;
 
 public class Situation extends A_Situation implements Serializable{
-	String besitzer;
+	//String besitzer;
 	Status_Feld[] feld = new Status_Feld[9];
 	public Status_Feld[] getFeld() {
 		return feld;
@@ -18,22 +18,16 @@ public class Situation extends A_Situation implements Serializable{
 		for(int i=0;i<9;i++)
 			feld[i] = new Status_Feld();
 	}
+	/*
 	public String getBesitzer() {
 		return besitzer;
 	}
 	public void setBesitzer(String besitzer) {
 		this.besitzer = besitzer;
 	}
-
+	*/
 	
 
-	
-	public Situation(String besitzer) {
-		this.besitzer = besitzer;
-		for(int i=0;i<9;i++)
-			feld[i] = new Status_Feld();
-		
-	}
 	public void veraendere(String agent, int feld){
 		//System.err.println("Bekommt " + toString() + " wobei feld " + feld + " ist");
 		if(agent.equals("a1")){
@@ -47,8 +41,14 @@ public class Situation extends A_Situation implements Serializable{
 		
 	}
 		
+	public static Situation copy(Situation other){
+		Situation neu = new Situation();
+		neu.setFeld(other.getFeld());
+		return neu;
+	}
+	
 	@Override
-	public long defeniere_ID() {
+	public long definiere_ID() {
 		int id= 0;
 		for(int i =0;i<9;i++){
 			if(this.feld[i].isGeaendert())

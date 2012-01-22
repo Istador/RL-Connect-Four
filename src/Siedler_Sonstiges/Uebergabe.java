@@ -4,6 +4,7 @@ package Siedler_Sonstiges;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import Sieder_Gebäude_P.*;
 import Siedler_Aktionen.Baue;
@@ -14,34 +15,35 @@ import Agent.A_Uebergabe;
 
 
 public class Uebergabe extends A_Uebergabe{
-	HashMap<String, A_Situation> situationen = new HashMap<String, A_Situation>();
-	ArrayList<A_Aktion> aktionen_ID;
+	//HashMap<String, A_Situation> situationen = new HashMap<String, A_Situation>();
+	Set<A_Aktion> aktionen_ID;
 	HashMap<String, A_Aktion> aktionen = new HashMap<String, A_Aktion>();
+	Set<String> agenten;
 	public HashMap<String, A_Aktion> getAktionen() {
 		return aktionen;
 	}
 	public void setAktionen(HashMap<String, A_Aktion> aktionen) {
 		this.aktionen = aktionen;
 	}
-	public ArrayList<A_Aktion> getAktionen_ID() {
+	public Set<A_Aktion> getAktionen_ID() {
 		return aktionen_ID;
 	}
-	public void setAktionen_ID(ArrayList<A_Aktion> aktionen_ID) {
+	public void setAktionen_ID(Set<A_Aktion> aktionen_ID) {
 		this.aktionen_ID = aktionen_ID;
 	}
-	public HashMap<String, A_Situation> getSituationen() {
+	/*public HashMap<String, A_Situation> getSituationen() {
 		return  situationen;
 	}
 	public void setSituationen(HashMap<String, A_Situation> situationen) {
 		this.situationen = situationen;
-	}
-	public ArrayList<String> getAgenten() {
+	}*/
+	public Set<String> getAgenten() {
 		return agenten;
 	}
-	public void setAgenten(ArrayList<String> agenten) {
+	public void setAgenten(Set<String> agenten) {
 		this.agenten = agenten;
 	}
-	ArrayList<String> agenten;
+	
 	public Uebergabe() {
 			System.out.println("UEBERGABE SIEDER");
 			Ressourcen ressourcen = new Ressourcen();
@@ -140,21 +142,20 @@ public class Uebergabe extends A_Uebergabe{
 			res_Farm_zur_Prouktion.put(ressourcen.getRessource("Eisenerz"), 1);
 			
 			gebauede.add(new Eisenschmiede(res_Eisenschmiede_Benötigt, res_Eisenschmiede_Produziert, res_Eisenschmiede_zur_Prouktion));
-			this.aktionen_ID = new ArrayList<A_Aktion>();
+			this.aktionen_ID = new java.util.HashSet<A_Aktion>();
 			
 			for(int i=0;i<gebauede.size();i++)
-				aktionen_ID.add(new Baue(i, gebauede.get(i)));
+				aktionen_ID.add(new Baue(gebauede.get(i)));
 			
-			aktionen_ID.add(new Baue(gebauede.size(), null));
+			aktionen_ID.add(new Baue(null));
 			
 			
 			try
 			 {
-				this.agenten = new ArrayList<String>();
+				this.agenten = new java.util.HashSet<String>();
 				this.agenten.add("a1");
 				this.agenten.add("a2");
-				this.situationen.put("a1", new Situation("a1"));
-				this.situationen.put("a2", new Situation("a2"));
+				this.situation = new Situation();
 			 }
 			catch (Exception e)
 			 {

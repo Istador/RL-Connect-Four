@@ -22,21 +22,22 @@ import Agent.A_Situation;
 
 
 public class Situation extends A_Situation implements java.io.Serializable {
-	String besitzer;
 	HashMap<Ressource, Integer> resourcen = new HashMap<Ressource, Integer>();
+	
 	public HashMap<Ressource, Integer> getResourcen() {
 		return resourcen;
 	}
+	
 	public void setResourcen(HashMap<Ressource, Integer> resourcen) {
 		this.resourcen = resourcen;
 	}
+	
 	protected final List<Gebäude> gebäude = new ArrayList<Gebäude>();
 	
 	public List<Gebäude> getBuilding() {
 		return gebäude;
 	}
-	public Situation(String besitzer) {
-		this.besitzer = besitzer;
+	public Situation() {
 		resourcen.put(Ressourcen.getRessource("Holz") ,0);
 		resourcen.put(Ressourcen.getRessource("Baumstamm") , 20);
 		resourcen.put(Ressourcen.getRessource("Gras") , 0);
@@ -48,6 +49,14 @@ public class Situation extends A_Situation implements java.io.Serializable {
 		resourcen.put(Ressourcen.getRessource("Eisen"), 0);
 		resourcen.put(Ressourcen.getRessource("Stein"), 10);
 	}
+	
+	public static Situation copy(Situation other){
+		Situation neu = new Situation();
+		HashMap<Ressource, Integer> ressis = new HashMap<Ressource, Integer>(other.getResourcen());
+		neu.setResourcen(ressis);
+		return neu;
+	}
+	
 	@Override
 	public boolean equals(Object arg0) {
 		if(arg0 instanceof Situation){
@@ -116,7 +125,7 @@ public class Situation extends A_Situation implements java.io.Serializable {
 		return id;
 	}
 	@Override
-	public long defeniere_ID() {
+	public long definiere_ID() {
 		int id=0;
 		int bäckerrei=0;
 		int eisenMine=0;

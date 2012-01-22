@@ -7,8 +7,9 @@ import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import Grid.Situation;
 
@@ -164,23 +165,24 @@ public class Umwelt extends A_Umwelt {
 	}
 		
 	}
+	
+	boolean episodevorbei = false;
 	public Double berechne_Reward(String agent) {
-		
-			
-		HashMap<String, A_Situation> situationen = super.getSituationen();
-		A_Situation situation = situationen.get(agent);
-		Situation sit = (Situation) situation;
+		Situation sit = (Situation) super.getSituation();
 		System.out.println("Vergleich mit : " + sit);
 		if(sit.getX() == 2 && sit.getY() == 2 || sit.getX() == 1 && sit.getY() == 2 || sit.getX() == 3 && sit.getY() == 2){
 			System.err.println("REWARD");
 			set_Inital();
+			episodevorbei = true;
 			super.neue_Episode();
 			return 100.0;
 			
 			
 		}
-		else
+		else{
+			episodevorbei = false;
 			return 0.0;
+		}
 	}
 	@Override
 	public A_Situation gib_Situation_Agent() {
@@ -189,10 +191,19 @@ public class Umwelt extends A_Umwelt {
 	}
 	@Override
 	public boolean aktion_Moeglich(A_Aktion aktion_tmp, String agent) {
+		
+		Situation sit = (Situation) aktion_tmp.fuehre_Aus(super.getSituation(), agent);
+		if(sit.equals(new Situation(1,1))){
+			System.err.println("GEBE EIN FALSE ZURÜCK");
+			return false;
+		}
+		return true;
+		
+		/*
 		Situation alt = (Situation) super.getSituationen().get(agent);
 		super.getSituationen().get(agent);
-		Situation situation = new Situation().copy(alt);
-		HashMap<String, A_Situation> map = new HashMap<String, A_Situation>();
+		Situation situation = Situation.copy(alt);
+		Map<String, A_Situation> map = new java.util.HashMap<String, A_Situation>();
 		map.put(agent, situation);
 		map = aktion_tmp.fuehre_Aus(map, agent);
 		Situation tmp2 = (Situation) map.get("a1");
@@ -201,7 +212,7 @@ public class Umwelt extends A_Umwelt {
 				System.err.println("GEBE EIN FALSE ZURÜCK");
 			return false;
 		}
-			
+		*/
 		//	if(super.getSituationen().get(agent).equals(new Situation(0,0)))
 			//	return false;
 		
@@ -214,30 +225,38 @@ public class Umwelt extends A_Umwelt {
 		
 	
 		
-		return true;
+		//return true;
 	}
 
+	/*
 	public void aktualisiere_GUI(String agent) {
-		Situation sit = (Situation) super.getSituationen().get(agent);
+		Situation sit = (Situation) super.getSituation();
 		gui.aktualisiere(sit.getX(), sit.getY());
 		
 	}
+	*/
+	
 	@Override
 	public void aktualisiere_GUI() {
-		Situation sit = (Situation) super.getSituationen().get("a1");
+		Situation sit = (Situation) super.getSituation();
 		gui.aktualisiere(sit.getX(), sit.getY());
 		
 	}
 	public void set_Inital(){
-		ArrayList<String> agenten = super.getAgenten();
+		//Set<String> agenten = super.getAgenten();
 		System.err.println("GUI");
-		for(int i=0; i< agenten.size();i++)
-			super.getSituationen().put(agenten.get(i), new Situation(agenten.get(i) ));
+		setSituation(new Situation());	
+			//super.getSituationen().put(a, new Situation(a));
 		//for(String agent_S: agenten)
 			//aktualisiere_GUI(agent_S);
 		System.err.println("RESET");
-		aktualisiere_GUI("a1");
+		//aktualisiere_GUI("a1");
 		aktualisiere_GUI();
+	}
+	
+	@Override
+	public boolean istEpisodeVorbei() {
+		return episodevorbei;
 	}
 
 }

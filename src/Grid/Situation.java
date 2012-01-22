@@ -23,10 +23,6 @@ public class Situation extends A_Situation{
 			return false;
 		
 	}
-	public Situation(String besitzer){
-		int x = 0;
-		int y = 0;
-	}
 	public Situation() {
 		int x = 0;
 		int y = 0;
@@ -35,7 +31,7 @@ public class Situation extends A_Situation{
 			this.x=x;
 			this.y=y;
 	}
-	public Situation copy(Situation situation){
+	public static Situation copy(Situation situation){
 		Situation tmp = new Situation();
 		tmp.setX(situation.getX());
 		tmp.setY(situation.getY());
@@ -72,7 +68,7 @@ public class Situation extends A_Situation{
 		
 	}
 	@Override
-	public long defeniere_ID() {
+	public long definiere_ID() {
 		return x + (100 * y);
 	}
 }

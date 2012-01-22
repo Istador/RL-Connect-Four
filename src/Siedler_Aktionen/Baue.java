@@ -2,8 +2,8 @@ package Siedler_Aktionen;
 
 import jade.util.leap.Serializable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import Sieder_Gebäude_P.Bäckerrei;
 import Sieder_Gebäude_P.EisenMine;
@@ -39,12 +39,12 @@ public class Baue extends A_Aktion implements Serializable{
 
 	Gebäude gebäude;
 	
-	HashMap<Ressource, Integer> benötigte_Ressourcen = new HashMap<Ressource, Integer>();
-	public Baue(int i, Gebäude gebäude) {
-		super(i);
+	Map<Ressource, Integer> benötigte_Ressourcen = new java.util.HashMap<Ressource, Integer>();
+	public Baue(Gebäude gebäude) {
+		super();
 		this.gebäude = gebäude;
 		if(gebäude!=null)
-		this.benötigte_Ressourcen = gebäude.getBenötigte_Ressourcen();
+			this.benötigte_Ressourcen = gebäude.getBenötigte_Ressourcen();
 	
 	//	System.out.println("Baut ein " + gebäude);
 	}
@@ -61,11 +61,11 @@ public class Baue extends A_Aktion implements Serializable{
 	}
 	public Situation produziere(Situation situation){
 
-		ArrayList<Gebäude> gebauede = (ArrayList<Gebäude>) situation.getBuilding();
+		List<Gebäude> gebauede = (List<Gebäude>) situation.getBuilding();
 		for(int i=0;i<gebauede.size();i++){
 			
-			HashMap<Ressource, Integer> erhaltene_Ressourcen = gebauede.get(i).getProduzierte_Ressourcen();
-			HashMap<Ressource, Integer> benötigt = gebauede.get(i).getBenötigt_zumproduzieren_Ressourcen();
+			Map<Ressource, Integer> erhaltene_Ressourcen = gebauede.get(i).getProduzierte_Ressourcen();
+			Map<Ressource, Integer> benötigt = gebauede.get(i).getBenötigt_zumproduzieren_Ressourcen();
 			//Produziere wenn man nix braucht
 			if(benötigt.keySet().isEmpty()){
 				for(Ressource res : erhaltene_Ressourcen.keySet())
@@ -102,21 +102,21 @@ public class Baue extends A_Aktion implements Serializable{
 		return situation;
 	}
 	@Override
-	public HashMap<String, A_Situation> fuehre_Aus(HashMap<String, A_Situation> situation, String agent) {
-		Situation sit = (Situation) situation.get(agent);
+	public A_Situation fuehre_Aus(A_Situation situation, String agent) {
+	//public Map<String, A_Situation> fuehre_Aus(Map<String, A_Situation> situation, String agent) {
+		Situation sit = Situation.copy((Situation) situation);
 		this.produziere(sit);
 		if(gebäude == null)
-			return situation;
+			return sit;
 		System.out.println("Ausführen vom bau von " + gebäude);
 	
 		sit.getBuilding().add(gebäude);
-		HashMap<Ressource, Integer> tmp_Map = sit.getResourcen();
+		Map<Ressource, Integer> tmp_Map = sit.getResourcen();
 		for(Ressource res : benötigte_Ressourcen.keySet()){
 			
 			sit.getResourcen().put(res, tmp_Map.get(res) - benötigte_Ressourcen.get(res));
 		}
-		situation.put(agent, sit);
-		return situation;
+		return sit;
 	}
 
 
@@ -132,7 +132,7 @@ public class Baue extends A_Aktion implements Serializable{
 		}else
 			return false;
 	}
-	public HashMap<Ressource, Integer> getBenötigte_Ressourcen() {
+	public Map<Ressource, Integer> getBenötigte_Ressourcen() {
 		return benötigte_Ressourcen;
 	}
 
@@ -140,7 +140,7 @@ public class Baue extends A_Aktion implements Serializable{
 
 
 	public void setBenötigte_Ressourcen(
-			HashMap<Ressource, Integer> benötigte_Ressourcen) {
+			Map<Ressource, Integer> benötigte_Ressourcen) {
 		this.benötigte_Ressourcen = benötigte_Ressourcen;
 	}
 
@@ -170,15 +170,6 @@ public class Baue extends A_Aktion implements Serializable{
 		else if(gebäude instanceof Steinmetz)
 			return 5010;
 		return 5011;
-	}
-
-
-
-
-	@Override
-	public int defeniere_ID() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 

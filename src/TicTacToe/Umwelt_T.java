@@ -1,7 +1,8 @@
 package TicTacToe;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import TicTacToe.Situation;
 
@@ -174,15 +175,15 @@ class ausfuerhung_a2 extends Behaviour{
 	@Override
 	public void aktualisiere_GUI() {
 		System.err.println("GUI");
-		Situation sit1 = (Situation) super.getSituationen().get("a1");
-		Situation sit2 = (Situation) super.getSituationen().get("a2");
+		Situation sit1 = (Situation) super.getSituation();
+		Situation sit2 = (Situation) super.getSituation();
 		gui.aktualisiere(sit1.feld, sit2.feld);
 		
 	}
 
 	@Override
 	public boolean aktion_Moeglich(A_Aktion a_Aktion, String agent) {
-		Situation sit = (Situation) super.getSituationen().get(agent);
+		Situation sit = (Situation) super.getSituation();
 		fuege_Ein aktion = (fuege_Ein) a_Aktion;
 		if(sit.feld[aktion.getVertikal() * 3 + aktion.getHorizontal()].isGeaendert())
 			return false;
@@ -196,10 +197,12 @@ class ausfuerhung_a2 extends Behaviour{
 		return null;
 	}
 
+	boolean epsiodevorbei = false;
+	
 	@Override
 	public Double berechne_Reward(String agent) {
 		System.err.println("BErechne reward");
-		Situation tmp = (Situation) super.getSituationen().get(agent);
+		Situation tmp = (Situation) super.getSituation();
 		double rew =0.0;
 		boolean pr = false;
 		
@@ -214,8 +217,8 @@ class ausfuerhung_a2 extends Behaviour{
 				if(tmp.feld[i].isP1()){
 					if(tmp.feld[i+1].isP1()){
 						if(tmp.feld[i+2].isP1()){
-							super.neue_Episode();
-				
+							//super.neue_Episode();
+							epsiodevorbei = true;
 							System.err.println("Reward beim ersten für " + agent);
 							return 100.0;
 						}
@@ -227,8 +230,8 @@ class ausfuerhung_a2 extends Behaviour{
 					int f=i;
 					if(tmp.feld[f+3].isP1()){
 						if(tmp.feld[f+6].isP1()){
-							super.neue_Episode();
-							
+							//super.neue_Episode();
+							epsiodevorbei = true;
 							System.err.println("Reward beim zweiten für " + agent + " mit i:" + i);
 							return 100.0;
 						}
@@ -236,21 +239,24 @@ class ausfuerhung_a2 extends Behaviour{
 				}
 			}
 			if(tmp.feld[0].isP1() && tmp.feld[4].isP1() && tmp.feld[8].isP1()){
-				super.neue_Episode();
+				//super.neue_Episode();
+				epsiodevorbei = true;
 				System.err.println("Reward beim dritten für " + agent);
 				
 				return 100.0;
 			}
 				
 			if(tmp.feld[2].isP1() && tmp.feld[4].isP1() && tmp.feld[6].isP1()){
-				super.neue_Episode();
+				//super.neue_Episode();
+				epsiodevorbei = true;
 				System.err.println("Reward beim vierten für " + agent);
 			
 				return 100.0;
 			}
 			if((tmp.feld[0].isP1() ||tmp.feld[0].isP2()) && (tmp.feld[1].isP1() ||tmp.feld[1].isP2()) &&(tmp.feld[2].isP1() ||tmp.feld[2].isP2()) &&(tmp.feld[3].isP1() ||tmp.feld[3].isP2()) &&(tmp.feld[4].isP1() ||tmp.feld[4].isP2()) &&(tmp.feld[5].isP1() ||tmp.feld[5].isP2()) && (tmp.feld[6].isP1() ||tmp.feld[6].isP2()) && (tmp.feld[7].isP1() ||tmp.feld[7].isP2())&& (tmp.feld[8].isP1() ||tmp.feld[8].isP2())){
 				System.err.println("Reward beim fünften für " + agent);
-				super.neue_Episode();
+				//super.neue_Episode();
+				epsiodevorbei = true;
 				return 0.0;
 			}
 				
@@ -261,8 +267,8 @@ class ausfuerhung_a2 extends Behaviour{
 				if(tmp.feld[i].isP2()){
 					if(tmp.feld[i+1].isP2()){
 						if(tmp.feld[i+2].isP2()){
-							super.neue_Episode();
-				
+							//super.neue_Episode();
+							epsiodevorbei = true;
 							System.err.println("Reward beim ersten  für " + agent);
 							return 100.0;
 						}
@@ -275,8 +281,8 @@ class ausfuerhung_a2 extends Behaviour{
 					int f=i;
 					if(tmp.feld[f+3].isP2()){
 						if(tmp.feld[f+6].isP2()){
-							super.neue_Episode();
-							
+							//super.neue_Episode();
+							epsiodevorbei = true;
 							System.err.println("Reward beim zweiten für " + agent);
 							return 100.0;
 						}
@@ -284,38 +290,45 @@ class ausfuerhung_a2 extends Behaviour{
 				}
 			}
 			if(tmp.feld[0].isP2() && tmp.feld[4].isP2() && tmp.feld[8].isP2()){
-				super.neue_Episode();
+				//super.neue_Episode();
+				epsiodevorbei = true;
 				System.err.println("Reward beim dritten für " + agent);
 
 				return 100.0;
 			}
 				
 			if(tmp.feld[2].isP2() && tmp.feld[4].isP2() && tmp.feld[6].isP2()){
-				super.neue_Episode();
+				//super.neue_Episode();
+				epsiodevorbei = true;
 				System.err.println("Reward beim vierten für " + agent);
 			
 				return 100.0;
 			}
 			if((tmp.feld[0].isP1() ||tmp.feld[0].isP2()) && (tmp.feld[1].isP1() ||tmp.feld[1].isP2()) &&(tmp.feld[2].isP1() ||tmp.feld[2].isP2()) &&(tmp.feld[3].isP1() ||tmp.feld[3].isP2()) &&(tmp.feld[4].isP1() ||tmp.feld[4].isP2()) &&(tmp.feld[5].isP1() ||tmp.feld[5].isP2()) && (tmp.feld[6].isP1() ||tmp.feld[6].isP2()) && (tmp.feld[7].isP1() ||tmp.feld[7].isP2())&& (tmp.feld[8].isP1() ||tmp.feld[8].isP2())){
 				System.err.println("Reward beim fünften für " + agent);
-				super.neue_Episode();
+				//super.neue_Episode();
+				epsiodevorbei = true;
+				return 0.0;
 			}
 			
 			
 				
 		}
 	
-	
+		epsiodevorbei = false;
 		return 0.0;
 	}
 	@Override
 	public void set_Inital(){
-		ArrayList<String> agenten = super.getAgenten();
-		
-		for(int i=0; i< agenten.size();i++)
-			super.getSituationen().put(agenten.get(i), new Situation(agenten.get(i) ));
+		super.setSituation(new Situation());
 		//for(String agent_S: agenten)
 			//aktualisiere_GUI(agent_S);
 		System.err.println("RESET");
+	}
+	
+	
+	@Override
+	public boolean istEpisodeVorbei() {
+		return epsiodevorbei;
 	}
 }

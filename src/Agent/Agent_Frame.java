@@ -1,198 +1,278 @@
 package Agent;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Set;
 
+/**
+ * Die Agenten-Klasse für die Agenten die mit der Umwelt interagieren.
+ * 
+ * Kommunikation mit der Umwelt, und Verwendung der Lernelemente.
+ * 
+ * getUebergabe() und getLernelement() muss von der konkreten Anwendung implementiert werden.
+ */
+public abstract class Agent_Frame extends Agent {
 
-public class Agent_Frame extends Agent{
-
+	//public long blocktime = 100; 
+	
 	private static final long serialVersionUID = 1L;
 	Problemgenerator problemgenerator = null;
 	Leistungselement leistungselement = null;
 	Lernelement lernelement = null;
-	
+
+	/*
+	 * Variablen, um festzustellen, ob alles drei in diesem Spielzug geliefert wurde
+	 */
 	boolean get_Episode = false;
 	boolean get_Reward = false;
 	boolean get_Situation = false;
-	Double tmp_Reward = 0.0;
+	
+	int tmp_Episode = 0;
+	double tmp_Reward = 0.0;
 	A_Situation tmp_Situation = null;
+	
 	A_Aktion aktion;
-	ArrayList<A_Aktion> aktionen = null;
+	Set<A_Aktion> aktionen = null;
 	GUI_Agent gui;
+
+	
+	/**
+	 * initialisierung der KI
+	 */
 	@Override
 	protected void setup() {
 		System.out.println("Starten des Agenten");
-	//A_Uebergabe uebergabe = new TicTacToe.Uebergabe();
-	//A_Uebergabe uebergabe = new Grid.Uebergabe();
-		//A_Uebergabe uebergabe = new Siedler_Sonstiges.Uebergabe();
-		//	A_Uebergabe uebergabe = new Uebergabe();
 		
-		A_Uebergabe uebergabe = new vierGewinntKI.VG_Uebergabe();
+		// A_Uebergabe uebergabe = new TicTacToe.Uebergabe();
+		// A_Uebergabe uebergabe = new Grid.Uebergabe();
+		// A_Uebergabe uebergabe = new Siedler_Sonstiges.Uebergabe();
+		// A_Uebergabe uebergabe = new Uebergabe();
+		A_Uebergabe uebergabe = getUebergabe();
+		A_Factory factory = uebergabe.getFactory();
 		
 		aktionen = uebergabe.getAktionen_ID();
-		 gui = new GUI_Agent(uebergabe.getAktionen_ID());
-		leistungselement = new Leistungselement(aktionen);
-		//lernelement = new Sarsa(0.2,0.2,aktionen);
-		lernelement = new Sarsa_Lamda(0.2,0.2,0.2,0.2, aktionen);
-		//lernelement = new Q_Learning_Off_Policy(0.2,0.2,0.2,0.2, aktionen);
-		//lernelement = new Q_Learning(0.2,0.2, aktionen);
-		problemgenerator = new Problemgenerator(aktionen, 20);
-		//gui =new GUI_Agent(aktionen); 
+		gui = new GUI_Agent(getLocalName());
+		leistungselement = new Leistungselement(factory, aktionen);
+		lernelement = getLernelement(factory, aktionen);
+		problemgenerator = new Problemgenerator(factory, aktionen, getEpsilon());
 
 		addBehaviour(new Kommunikationselement(this));
 		super.setup();
 	}
 	
-	class Kommunikationselement extends CyclicBehaviour  {
-		private static final long serialVersionUID = 1L;
-		  
+	/**
+	 * Implementierung durch die Anwendung, um die verwendete
+	 * A_Uebergabe Klasse zu bestimmen
+	 */
+	public abstract A_Uebergabe getUebergabe();
+	
+	/**
+	 * Implementiert durch die Anwendung, um bestimmen zu können
+	 * welches Lernelement (und mit welchen Parametern) es erstellt
+	 * werden soll.
+	 */
+	public abstract Lernelement getLernelement(A_Factory factory, Set<A_Aktion> aktionen);
+	
+	/**
+	 * Implementiert durch die Anwendung, um bestimmen zu können
+	 * wie oft exploriert werden soll.
+	 */
+	public abstract double getEpsilon();
+	
+	
+	
+	/** 
+	 * Unterklasse Kommunikutationselement
+	 * für die Kommunikation mit der Umwelt
+	 */
+	class Kommunikationselement extends CyclicBehaviour {
+		private static final long serialVersionUID = 7453521122843010691L;
 
 		Kommunikationselement(Agent a) {
-
 			super(a);
 		}
+
 		Object content;
 
 		@Override
-		  public void action() {
-		
-			//boolean first = true;
-			block(500);
-	         ACLMessage msg = receive();
-	         if (msg == null) { block(); return; }
-	         try {
-	            Object content = msg.getContentObject();
-
-	       
-				content = msg.getContentObject();
+		public void action() {
+			
+			// boolean first = true;
+			//block(blocktime);
+			
+			/**
+			 * Empfange Nachricht
+			 */
+			ACLMessage msg = receive();
+			if (msg == null) {
+				block();
+				return;
+			}
+			
+			/**
+			 * Nachricht auswerten
+			 */
+			try {
+				//Nachrichteninhalt
+				Object content = msg.getContentObject();
+				//content = msg.getContentObject();
+				
+				/**
+				 * empfange neue Situation von Umwelt
+				 */
 				if (content instanceof A_Situation) {
+					A_Situation old = tmp_Situation;
+					tmp_Situation = (A_Situation) content;
+					System.out.println(getLocalName() + " | "+old+" | neue Situation " + tmp_Situation.toString() + " erhalten ");
 					
-					tmp_Situation= (A_Situation) content;
-					System.out.println("Agent "+ getLocalName() + " hat Situation " + tmp_Situation.toString() + " mit der ID " + tmp_Situation.hashCode() + " erhalten " );
-					get_Situation = true;
-					leistungselement.setNeuste_Situation(tmp_Situation);
+					//leistungselement.setNeuste_Situation(tmp_Situation);
 					leistungselement.neue_Situation(tmp_Situation);
-					// System.out.println("Sit Beides empfangen bereit zum starten mit r:" + get_Reward + " Sit " + get_Situation);
 					
-					if(get_Reward && get_Episode){
-						
-						get_Reward = false;
-						get_Situation = false;
-				
-					
-						lernelement.aufruf(tmp_Situation, tmp_Reward, leistungselement, problemgenerator);
-						
-						sende_Aktion();
-					}
-				
-	
+					get_Situation = true;
+					doAction();
 				}
-			
+				
+				/**
+				 * empfange Belohnung von Umwelt
+				 */
 				else if (content instanceof Double) {
-					tmp_Reward = (Double) content;
-					System.out.println("Agent "+ getLocalName() + " hat Reward " + tmp_Reward  + " erhalten");
+					//wenn schon Reward erhalten, addieren
+					if(get_Reward)
+						tmp_Reward += (Double) content;
+					else
+						tmp_Reward = (Double) content;
+					System.out.println(getLocalName()+" | "+tmp_Situation+" | Reward " + tmp_Reward + " erhalten");
+					
 					get_Reward = true;
-					
-					// System.out.println("Dou Beides empfangen bereit zum starten mit r:" + get_Reward + " Sit " + get_Situation);
-					if(get_Situation && get_Episode){
-						//System.out.println("Beides empfangen bereit zum starten");
-						get_Reward = false;
-						get_Situation = false;
-						lernelement.aufruf(tmp_Situation, tmp_Reward , leistungselement, problemgenerator);
-						sende_Aktion();
-					}
-					
+					doAction();
 				}
+				
+				/**
+				 * empfange Episode von Umwelt
+				 */
 				else if (content instanceof Integer) {
-					Integer episode = (Integer) content;
-					leistungselement.setAktuelle_Episode(episode);
-					System.out.println("Agent "+ getLocalName() + " hat Episode " + episode + " erhalten");
-					 get_Episode = true;
-					// System.out.println("Int Beides empfangen bereit zum starten mit r:" + get_Reward + " Sit " + get_Situation);
-					 if(get_Situation && get_Reward){
-						
-						get_Reward = false;
-						get_Situation = false;
-						get_Episode = false;
-						lernelement.aufruf(tmp_Situation, tmp_Reward , leistungselement, problemgenerator);
-					//	problemgenerator.start_Generator(leistungselement);
-						sende_Aktion();
-					}
+					tmp_Episode = (Integer) content;
 					
+					System.out.println(getLocalName()+" | "+tmp_Situation+" | Episode "+tmp_Episode + " erhalten");
+					
+					get_Episode = true;
+					doAction();
 				}
-				else if(content instanceof Boolean){
-					System.out.println("BOOLEAN");
+				
+				/**
+				 * Bestätigung/Verwerfung der gewählten Aktion von der mwelt
+				 * - Aktion wurde erfolgreich in der Umwelt ausgeführt oder nicht
+				 */
+				else if (content instanceof Boolean) {
 					Boolean tmp = (Boolean) content;
-					System.out.println("Bestätgiugn erhalten mit " + tmp);
-					if(tmp){
-						leistungselement.aktualisiere_Histroy();
-						//lernelement.aufruf(tmp_Situation, tmp_Reward, leistungselement, problemgenerator);
-						System.err.println("TRUE BEKOMMEN");
-						lernelement.erste_Aktion = false;
-						leistungselement.verbotene_Reset();
 					
-						sende_Flag();
+					//Aktion erfolgreich ausgeführt
+					if (tmp) {
+						//Situations-Aktion in die History aufnehmen
+						leistungselement.aktualisiere_History();
+						// lernelement.aufruf(tmp_Situation, tmp_Reward, leistungselement, problemgenerator);
 					}
-					else{
-						System.err.println("Verbotene Aktion! Neue wählen" + leistungselement.getAktuelle_Aktion());
-					
-						lernelement.verbotene_Aktion(leistungselement);
-						if(leistungselement.explorierend)
-							problemgenerator.explorieren(leistungselement);
-						else
+					//Aktion von Umwelt verworfen (Verbotene Aktion)
+					else {
+						// bei einer verbotenen Aktion ist die Situation intern schon wieder anders.
+						System.out.println(getLocalName()+" | "+tmp_Situation+" | Verbotene Aktion "+leistungselement.getAktuelle_Aktion()+"! Neue wählen.");
+
+						//markiere Aktion als verboten
+						leistungselement.verbotene_Aktion(
+								leistungselement.getNeuste_Situation(),
+								leistungselement.getAktuelle_Aktion()
+								);
+						
+						//wähle andere Aktion
+						if(!problemgenerator.start_Generator(leistungselement))
 							leistungselement.berechne_Neue_Aktion(tmp_Situation);
+						
+						//sende gewählte Aktion an Umwelt
 						sende_Aktion();
 					}
 				}
-				gui.update_Werte(leistungselement.getWerte());
+				
+				//Aktualisierung der GUI
+				gui.update_Werte(leistungselement.getQWerte());
+				//System.out.println(getLocalName()+" | "+leistungselement.getWerte());
+
 			
-			} catch (NullPointerException e) {
-				System.out.println("HIEr");
-				System.out.println("Excpetion!");
-				System.err.println(e);
-			}catch (Exception e) {
-				System.out.println("Excpetion!");
-				System.err.println(e);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
 		}
-		public void sende_Aktion(){
 		
+		
+		/**
+		 * führe eine Aktion aus, wenn Reward, Episode und Situation geliefert wurden.
+		 * 
+		 * Reward, Episode und Situation kann in beliebiger Reihenfolge kommen.
+		 * Eine Aktion wird erst dann ausgewählt, wenn alles 3 da sind. 
+		 */
+		private void doAction(){
+			if (get_Reward && get_Episode && get_Situation) {
+				
+				//Variablen zurücksetzen
+				get_Reward = false;
+				get_Episode = false;
+				get_Situation = false;
+				
+				//Episode ändern falls geändert (Reihenfolge hier OK, oder Episode erst nach dem Lernen?)
+				leistungselement.setAktuelle_Episode(tmp_Episode);
+				
+				//Lerne aus dem Reward
+				lernelement.aufruf(tmp_Situation, tmp_Reward, leistungselement);
+				
+				//nächste Aktion auswählen
+				if(!problemgenerator.start_Generator(leistungselement))
+					leistungselement.berechne_Neue_Aktion(tmp_Situation);
+				
+				//gewählte Aktion an Umwelt senden
+				sende_Aktion();
+			}
+		}
+		
+
+		//sende die berechnete/gewählte Aktion an die Umwelt
+		public void sende_Aktion() {
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			//System.out.println("Sende Aktion "+ leistungselement.getAktuelle_Aktion().toString());
-			A_Aktion aktion = aktionen.get(leistungselement.getAktuelle_Aktion().getId());
+			System.out.println(getLocalName()+" | "+tmp_Situation+" | Sende Aktion "+ leistungselement.getAktuelle_Aktion().toString());
+			A_Aktion aktion = leistungselement.getAktuelle_Aktion();
 			try {
 				msg.setContentObject((java.io.Serializable) aktion);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			msg.addReceiver(new AID("umwelt",   AID.ISLOCALNAME));
+			msg.addReceiver(new AID("umwelt", AID.ISLOCALNAME));
 			send(msg);
 		}
-		public void sende_Flag(){
-			System.out.println("Sende true");
+
+		/*
+		public void sende_Flag() {
+			//System.out.println("Sende true");
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			//System.out.println("Sende Aktion "+ leistungselement.getAktuelle_Aktion().toString());
+			//System.out.println(getLocalName()+" | Sende Aktion "+ leistungselement.getAktuelle_Aktion().toString());
 			Boolean flag = new Boolean(true);
 			try {
 				msg.setContentObject((java.io.Serializable) flag);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			msg.addReceiver(new AID("umwelt",   AID.ISLOCALNAME));
+			msg.addReceiver(new AID("umwelt", AID.ISLOCALNAME));
 			send(msg);
 		}
-		
-			
-
-
-		
+		 */
 	};
+	
+	/**
+	 * Ende Kommunikations Unterklasse
+	 */
+	
+	
+	
 }
-

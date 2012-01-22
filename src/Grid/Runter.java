@@ -1,13 +1,14 @@
 package Grid;
-import java.util.HashMap;
+import java.util.Map;
 
 import Agent.*;
 public class  Runter extends A_Aktion{
 
-	public Runter(int id) {
-		super(id);
-		
+	public Runter() {
+		super();
 	}
+	
+	/*
 	//@Override
 	public A_Situation fuehre_Aus(A_Situation situation) {
 			Situation tmp = (Situation) situation;
@@ -19,27 +20,27 @@ public class  Runter extends A_Aktion{
 			tmp.setY(y);
 			return situation;
 	}
+	*/
+	
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return "RUNTER";
 	}
 	@Override
-	public int defeniere_ID() {
-		// TODO Auto-generated method stub
+	public int definiere_ID() {
 		return 2;
 	}
 	@Override
-	public HashMap<String, A_Situation> fuehre_Aus(
-			HashMap<String, A_Situation> situation, String agent) {
-		Situation tmp = (Situation)situation.get(agent);
+	public A_Situation fuehre_Aus(A_Situation situation, String agent) {
+	//public Map<String, A_Situation> fuehre_Aus(Map<String, A_Situation> situation, String agent) {
+		Situation tmp = Situation.copy((Situation)situation);
 		int y = tmp.getY();
 		if(y > 0)
 			y = y-1;
 		else
 			y = 3;
 		tmp.setY(y);
-		return situation;
+		return tmp;
 	}
 
 	

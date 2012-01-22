@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -15,16 +16,16 @@ import javax.swing.JFrame;
 import Agent.A_Aktion;
 
 public class GUI extends JFrame{
-		boolean end =true;
+		boolean end = true;
 		ArrayList<A_Aktion> aktionen = new ArrayList<A_Aktion>();
 		Status_Feld[] p1 =new Status_Feld[9];
 		Status_Feld[] p2 =new Status_Feld[9];
-		GUI(ArrayList<A_Aktion> arrayList){
+		GUI(Set<A_Aktion> arrayList){
 			this.setName("Tic Tac Toe");
 			this.setSize(600, 600);
 			this.setAlwaysOnTop(true);
 			this.setVisible(true);
-			this.aktionen = arrayList;
+			this.aktionen = new ArrayList<A_Aktion>(arrayList);
 			repaint();
 		}
 		public void paint(Graphics g){
